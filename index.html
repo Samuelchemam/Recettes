@@ -1,53 +1,115 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Recettes Collaboratives</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="description" content="Application collaborative de gestion de recettes">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mes Recettes Collaboratives</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <header>
-        <h1>Bienvenue sur le site de recettes collaboratives</h1>
-        <button id="toggle-darkmode">Mode sombre</button>
-    </header>
+  <!-- Accessibilité -->
+  <a href="#main" class="skip-link">Aller au contenu</a>
 
-    <section>
-        <h2>Ajouter une nouvelle recette</h2>
-        <form id="formulaire-recette">
-            <label for="titre">Titre de la recette :</label>
-            <input type="text" id="titre" placeholder="Ex : Gâteau au chocolat" required>
+  <!-- En-tête -->
+  <header>
+    <h1>🍳 Mes Recettes</h1>
+    <nav aria-label="Navigation principale">
+      <ul>
+        <li><a href="#ajout">Ajouter</a></li>
+        <li><a href="#liste">Recettes</a></li>
+      </ul>
+    </nav>
+    <button id="toggle-darkmode" class="btn-mode">🌓 Mode sombre</button>
+  </header>
 
-            <label for="auteur">Auteur :</label>
-            <input type="text" id="auteur" placeholder="Ex : Samuel" required>
+  <!-- Contenu principal -->
+  <main id="main">
+    <div id="loading" class="loading">Chargement des recettes...</div>
 
-            <label for="difficulty">Difficulté (1 à 5) :</label>
-            <input type="number" id="difficulty" min="1" max="5" required>
-
-            <label for="ingredients">Ingrédients :</label>
-            <textarea id="ingredients" rows="3" placeholder="Liste des ingrédients..." required></textarea>
-
-            <label for="etapes">Étapes :</label>
-            <textarea id="etapes" rows="4" placeholder="Décrivez les étapes de la recette..." required></textarea>
-
-            <button type="submit">Ajouter la recette</button>
-        </form>
+    <!-- Recherche -->
+    <section class="search-filter-section">
+      <input type="text" 
+             id="search-input" 
+             placeholder="🔍 Rechercher (titre, ingrédient...)">
     </section>
 
-    <section>
-        <h2>Rechercher une recette</h2>
-        <input type="text" id="search-input" placeholder="Recherchez par titre ou ingrédient...">
+    <!-- Formulaire d'ajout -->
+    <section id="ajout" class="content-wrapper">
+      <h2>➕ Nouvelle Recette</h2>
+      <form id="formulaire-recette">
+        <div id="error-message" class="error-message"></div>
+
+        <div class="form-group">
+          <label for="titre">Titre :</label>
+          <input type="text" id="titre" name="titre" required>
+        </div>
+
+        <div class="form-group">
+          <label for="auteur">Auteur :</label>
+          <input type="text" id="auteur" name="auteur" required>
+        </div>
+
+        <div class="form-group">
+          <label for="difficulty">Difficulté :</label>
+          <select id="difficulty" name="difficulty" required>
+            <option value="1">⭐ Très facile</option>
+            <option value="2">⭐⭐ Facile</option>
+            <option value="3">⭐⭐⭐ Moyen</option>
+            <option value="4">⭐⭐⭐⭐ Difficile</option>
+            <option value="5">⭐⭐⭐⭐⭐ Expert</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="ingredients">Ingrédients :</label>
+          <textarea id="ingredients" 
+                    name="ingredients" 
+                    rows="4"
+                    placeholder="Un ingrédient par ligne..."
+                    required></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="etapes">Étapes de préparation :</label>
+          <textarea id="etapes" 
+                    name="etapes" 
+                    rows="6"
+                    placeholder="Décrire chaque étape..."
+                    required></textarea>
+        </div>
+
+        <button type="submit" class="btn-primary">📤 Publier la recette</button>
+      </form>
     </section>
 
-    <section>
-        <h2>Liste des recettes</h2>
-        <div id="liste-recettes"></div>
+    <!-- Liste des recettes -->
+    <section id="liste" class="content-wrapper">
+      <h2>📜 Toutes les Recettes</h2>
+      <div id="liste-recettes" class="recettes-grid"></div>
     </section>
+  </main>
 
-    <footer>
-        <p>&copy; 2025 - Recettes collaboratives</p>
-    </footer>
+  <!-- Pied de page -->
+  <footer>
+    <p>&copy; <span id="year"></span> - Recettes Collaboratives</p>
+  </footer>
 
-    <script src="script.js"></script>
+  <!-- Modale d'édition -->
+  <div id="editModal" class="modal">
+    <div class="modal-content">
+      <span id="closeModal" class="close">&times;</span>
+      <h3>✏️ Modifier la Recette</h3>
+      <form id="formulaire-edit">
+        <!-- Les champs d'édition sont générés dynamiquement -->
+      </form>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+  <script>
+    // Mise à jour automatique de l'année
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script>
 </body>
 </html>
