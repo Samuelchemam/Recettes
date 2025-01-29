@@ -262,3 +262,50 @@ body.dark-mode #toggle-darkmode {
     color: white;
     cursor: pointer;
 }
+/*---------------------------
+  Messages d'erreur
+---------------------------*/
+.error-message {
+    color: #dc3545;
+    background-color: #f8d7da;
+    padding: 10px;
+    border-radius: 4px;
+    margin: 10px 0;
+    display: none;
+    border: 1px solid #f5c6cb;
+}
+
+/*---------------------------
+  Indicateur de chargement
+---------------------------*/
+.loading {
+    text-align: center;
+    padding: 20px;
+    font-style: italic;
+    color: #666;
+}
+
+.dark-mode .loading {
+    color: #aaa;
+}
+
+/*---------------------------
+  Accessibilité
+---------------------------*/
+.skip-link {
+    position: absolute;
+    left: -999px;
+    top: auto;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+}
+
+.skip-link:focus {
+    position: static;
+    width: auto;
+    height: auto;
+    padding: 10px;
+    background: var(--color-primary);
+    color: white;
+}
