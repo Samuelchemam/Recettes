@@ -4,7 +4,7 @@ const JSONBIN_API_KEY = "$2a$10$4Ska2vFvhAi3cAtkswIlbO/HCFIQMoRFjlSK/15F763tDNEm
 let recettes = [];
 let currentEditIndex = null;
 
-// Fonctions utilitaires
+// Gestion d'erreurs
 function showError(message) {
   const errorDiv = document.getElementById('error-message');
   errorDiv.textContent = message;
@@ -13,34 +13,27 @@ function showError(message) {
 }
 
 // Mode sombre
-let darkModeActive = localStorage.getItem("darkMode") === "true";
-document.body.classList.toggle("dark-mode", darkModeActive);
-
-document.getElementById("toggle-darkmode").addEventListener("click", () => {
-  darkModeActive = !darkModeActive;
-  localStorage.setItem("darkMode", darkModeActive);
-  document.body.classList.toggle("dark-mode", darkModeActive);
+document.getElementById('toggle-darkmode').addEventListener('click', () => {
+  document.body.classList.toggle('dark-mode');
+  localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
 });
 
-// Charger les recettes depuis JSONbin
-async function chargerRecettesDepuisJSONbin() {
+// Charger les recettes
+async function chargerRecettes() {
   try {
-    document.getElementById('loading').style.display = 'block';
-    const reponse = await fetch(`${JSONBIN_URL}/latest`, {
+    const response = await fetch(`${JSONBIN_URL}/latest`, {
       headers: { "X-Master-Key": JSONBIN_API_KEY }
     });
-    const data = await reponse.json();
-    recettes = data.record.recettes || [];
+    const data = await response.json();
+    recettes = data.record?.recettes || [];
     afficherRecettes();
-  } catch (e) {
-    showError("Erreur de chargement des recettes");
-  } finally {
-    document.getElementById('loading').style.display = 'none';
+  } catch (error) {
+    showError("Erreur de chargement : " + error.message);
   }
 }
 
-// Sauvegarder les recettes sur JSONbin
-async function sauvegarderRecettesSurJSONbin() {
+// Sauvegarder les recettes
+async function sauvegarderRecettes() {
   try {
     await fetch(JSONBIN_URL, {
       method: "PUT",
@@ -50,127 +43,101 @@ async function sauvegarderRecettesSurJSONbin() {
       },
       body: JSON.stringify({ recettes })
     });
-  } catch (e) {
-    showError("Erreur de sauvegarde des recettes");
+  } catch (error) {
+    showError("Erreur de sauvegarde : " + error.message);
   }
 }
 
 // Afficher les recettes
 function afficherRecettes() {
-  const listeRecettes = document.getElementById("liste-recettes");
-  listeRecettes.innerHTML = "";
-
-  const data = filtrerRecettes();
-  if (data.length === 0) {
-    listeRecettes.innerHTML = "<p>Aucune recette trouvée.</p>";
-    return;
-  }
-
-  data.forEach((recette, index) => {
-    const divRecette = document.createElement("div");
-    divRecette.className = "recette";
-    divRecette.innerHTML = `
-      <button class="btn-delete" aria-label="Supprimer">&times;</button>
+  const container = document.getElementById('liste-recettes');
+  container.innerHTML = recettes.map((recette, index) => `
+    <div class="recette">
+      <button class="btn-delete" onclick="supprimerRecette(${index})">×</button>
       <h3>${recette.titre}</h3>
-      <p><strong>Auteur :</strong> ${recette.auteur}</p>
-      <p><strong>Difficulté :</strong> ${recette.difficulty}/5</p>
-      <h4>Ingrédients</h4>
-      <pre>${recette.ingredients}</pre>
-      <h4>Étapes</h4>
-      <pre>${recette.etapes}</pre>
-      <button class="btn-edit">Modifier</button>
-    `;
-
-    divRecette.querySelector('.btn-delete').addEventListener('click', () => supprimerRecette(index));
-    divRecette.querySelector('.btn-edit').addEventListener('click', () => openEditModal(index));
-    listeRecettes.appendChild(divRecette);
-  });
+      <p class="auteur">👨🍳 ${recette.auteur}</p>
+      <p class="difficulte">${'⭐'.repeat(recette.difficulty)}</p>
+      <div class="ingredients">
+        <h4>Ingrédients :</h4>
+        <pre>${recette.ingredients}</pre>
+      </div>
+      <div class="etapes">
+        <h4>Préparation :</h4>
+        <pre>${recette.etapes}</pre>
+      </div>
+      <button class="btn-edit" onclick="ouvrirModaleEdition(${index})">✏️ Modifier</button>
+    </div>
+  `).join('');
 }
 
-// Filtrer les recettes
-function filtrerRecettes() {
-  const searchTerm = document.getElementById("search-input").value.toLowerCase();
-  return recettes.filter(r => {
-    const content = `${r.titre} ${r.ingredients} ${r.etapes}`.toLowerCase();
-    return content.includes(searchTerm);
-  });
-}
-
-// Supprimer une recette
-function supprimerRecette(index) {
-  recettes.splice(index, 1);
-  sauvegarderRecettesSurJSONbin();
-  afficherRecettes();
-}
-
-// Ouvrir la modale d'édition
-function openEditModal(index) {
-  currentEditIndex = index;
-  const recette = recettes[index];
-  
-  document.getElementById('edit-titre').value = recette.titre;
-  document.getElementById('edit-difficulty').value = recette.difficulty;
-  document.getElementById('edit-auteur').value = recette.auteur;
-  document.getElementById('edit-ingredients').value = recette.ingredients;
-  document.getElementById('edit-etapes').value = recette.etapes;
-  
-  document.getElementById('editModal').style.display = 'block';
-}
-
-// Fermer la modale d'édition
-function closeEditModal() {
-  document.getElementById('editModal').style.display = 'none';
-}
-
-// Gestion de la modale
-document.getElementById('closeModal').addEventListener('click', closeEditModal);
-window.onclick = e => e.target === document.getElementById('editModal') && closeEditModal();
-
-// Soumission du formulaire d'édition
-document.getElementById('formulaire-edit').addEventListener('submit', e => {
+// Gestion formulaire
+document.getElementById('formulaire-recette').addEventListener('submit', async e => {
   e.preventDefault();
-  
-  const updatedRecette = {
-    titre: document.getElementById('edit-titre').value.trim(),
-    difficulty: parseInt(document.getElementById('edit-difficulty').value),
-    auteur: document.getElementById('edit-auteur').value.trim(),
-    ingredients: document.getElementById('edit-ingredients').value.trim(),
-    etapes: document.getElementById('edit-etapes').value.trim()
+
+  const nouvelleRecette = {
+    titre: document.getElementById('titre').value.trim(),
+    auteur: document.getElementById('auteur').value.trim(),
+    difficulty: parseInt(document.getElementById('difficulty').value),
+    ingredients: document.getElementById('ingredients').value.trim(),
+    etapes: document.getElementById('etapes').value.trim()
   };
 
-  if (currentEditIndex !== null) {
-    recettes[currentEditIndex] = updatedRecette;
-    sauvegarderRecettesSurJSONbin();
-    afficherRecettes();
-    closeEditModal();
-  }
-});
-
-// Soumission du formulaire d'ajout
-document.getElementById("formulaire-recette").addEventListener("submit", async e => {
-  e.preventDefault();
-
-  const titre = document.getElementById("titre").value.trim();
-  const difficulty = parseInt(document.getElementById("difficulty").value);
-  const auteur = document.getElementById("auteur").value.trim();
-  const ingredients = document.getElementById("ingredients").value.trim();
-  const etapes = document.getElementById("etapes").value.trim();
-
-  if (!titre || !auteur || !ingredients || !etapes) {
-    showError("Tous les champs sont obligatoires");
+  if (Object.values(nouvelleRecette).some(v => !v)) {
+    showError("Tous les champs sont obligatoires !");
     return;
   }
 
-  if (difficulty < 1 || difficulty > 5) {
-    showError("La difficulté doit être entre 1 et 5");
-    return;
-  }
-
-  recettes.push({ titre, difficulty, auteur, ingredients, etapes });
-  await sauvegarderRecettesSurJSONbin();
+  recettes.push(nouvelleRecette);
+  await sauvegarderRecettes();
   afficherRecettes();
   e.target.reset();
 });
 
+// Gestion édition
+function ouvrirModaleEdition(index) {
+  currentEditIndex = index;
+  const recette = recettes[index];
+  
+  document.getElementById('edit-titre').value = recette.titre;
+  document.getElementById('edit-auteur').value = recette.auteur;
+  document.getElementById('edit-difficulty').value = recette.difficulty;
+  document.getElementById('edit-ingredients').value = recette.ingredients;
+  document.getElementById('edit-etapes').value = recette.etapes;
+  
+  document.getElementById('editModal').style.display = 'flex';
+}
+
+document.getElementById('formulaire-edit').addEventListener('submit', async e => {
+  e.preventDefault();
+  
+  const recetteModifiee = {
+    titre: document.getElementById('edit-titre').value.trim(),
+    auteur: document.getElementById('edit-auteur').value.trim(),
+    difficulty: parseInt(document.getElementById('edit-difficulty').value),
+    ingredients: document.getElementById('edit-ingredients').value.trim(),
+    etapes: document.getElementById('edit-etapes').value.trim()
+  };
+
+  recettes[currentEditIndex] = recetteModifiee;
+  await sauvegarderRecettes();
+  afficherRecettes();
+  document.getElementById('editModal').style.display = 'none';
+});
+
+// Suppression
+function supprimerRecette(index) {
+  recettes.splice(index, 1);
+  sauvegarderRecettes();
+  afficherRecettes();
+}
+
+// Fermer modale
+document.getElementById('closeModal').addEventListener('click', () => {
+  document.getElementById('editModal').style.display = 'none';
+});
+
 // Initialisation
-window.onload = chargerRecettesDepuisJSONbin;
+if (localStorage.getItem('darkMode') === 'true') {
+  document.body.classList.add('dark-mode');
+}
+chargerRecettes();
