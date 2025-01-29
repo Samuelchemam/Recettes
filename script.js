@@ -1,10 +1,10 @@
 const JSONBIN_URL = "https://api.jsonbin.io/v3/b/679a7e77e41b4d34e480d272";
-const JSONBIN_API_KEY = "$2a$10$4Ska2vFvhAi3cAtkswIlbO/HCFIQMoRFjlSK/15F763tDNEm0M5ou"; // À remplacer en prod
+const JSONBIN_API_KEY = "$2a$10$4Ska2vFvhAi3cAtkswIlbO/HCFIQMoRFjlSK/15F763tDNEm0M5ou";
 
 let recettes = [];
 let currentEditIndex = null;
 
-// Fonctions d'état
+// Fonctions utilitaires
 function showError(message) {
   const errorDiv = document.getElementById('error-message');
   errorDiv.textContent = message;
@@ -22,7 +22,7 @@ document.getElementById("toggle-darkmode").addEventListener("click", () => {
   document.body.classList.toggle("dark-mode", darkModeActive);
 });
 
-// Gestion des données
+// Charger les recettes depuis JSONbin
 async function chargerRecettesDepuisJSONbin() {
   try {
     document.getElementById('loading').style.display = 'block';
@@ -39,6 +39,7 @@ async function chargerRecettesDepuisJSONbin() {
   }
 }
 
+// Sauvegarder les recettes sur JSONbin
 async function sauvegarderRecettesSurJSONbin() {
   try {
     await fetch(JSONBIN_URL, {
@@ -50,19 +51,11 @@ async function sauvegarderRecettesSurJSONbin() {
       body: JSON.stringify({ recettes })
     });
   } catch (e) {
-    showError("Erreur de sauvegarde");
+    showError("Erreur de sauvegarde des recettes");
   }
 }
 
-// Gestion UI
-function filtrerRecettes() {
-  const searchTerm = document.getElementById("search-input").value.toLowerCase();
-  return recettes.filter(r => {
-    const content = `${r.titre} ${r.ingredients} ${r.etapes}`.toLowerCase();
-    return content.includes(searchTerm);
-  });
-}
-
+// Afficher les recettes
 function afficherRecettes() {
   const listeRecettes = document.getElementById("liste-recettes");
   listeRecettes.innerHTML = "";
@@ -94,14 +87,23 @@ function afficherRecettes() {
   });
 }
 
-// Gestion recettes
+// Filtrer les recettes
+function filtrerRecettes() {
+  const searchTerm = document.getElementById("search-input").value.toLowerCase();
+  return recettes.filter(r => {
+    const content = `${r.titre} ${r.ingredients} ${r.etapes}`.toLowerCase();
+    return content.includes(searchTerm);
+  });
+}
+
+// Supprimer une recette
 function supprimerRecette(index) {
   recettes.splice(index, 1);
   sauvegarderRecettesSurJSONbin();
   afficherRecettes();
 }
 
-// Modale d'édition
+// Ouvrir la modale d'édition
 function openEditModal(index) {
   currentEditIndex = index;
   const recette = recettes[index];
@@ -115,13 +117,16 @@ function openEditModal(index) {
   document.getElementById('editModal').style.display = 'block';
 }
 
+// Fermer la modale d'édition
 function closeEditModal() {
   document.getElementById('editModal').style.display = 'none';
 }
 
+// Gestion de la modale
 document.getElementById('closeModal').addEventListener('click', closeEditModal);
 window.onclick = e => e.target === document.getElementById('editModal') && closeEditModal();
 
+// Soumission du formulaire d'édition
 document.getElementById('formulaire-edit').addEventListener('submit', e => {
   e.preventDefault();
   
@@ -141,7 +146,7 @@ document.getElementById('formulaire-edit').addEventListener('submit', e => {
   }
 });
 
-// Formulaire d'ajout
+// Soumission du formulaire d'ajout
 document.getElementById("formulaire-recette").addEventListener("submit", async e => {
   e.preventDefault();
 
