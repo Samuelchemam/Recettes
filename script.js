@@ -15,7 +15,7 @@ function showError(message) {
   const errorDiv = document.getElementById('error-message');
   errorDiv.textContent = message;
   errorDiv.style.display = 'block';
-  setTimeout(() => errorDiv.style.display = 'none', 3000);
+  setTimeout(() => (errorDiv.style.display = 'none'), 3000);
 }
 
 // Mode sombre
@@ -24,26 +24,17 @@ document.getElementById('toggle-darkmode').addEventListener('click', () => {
   localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
 });
 
-// Charger les recettes (CORRIGÉ)
+// Charger les recettes (restauration initiale)
 async function chargerRecettes() {
   try {
     const response = await fetch(`${JSONBIN_URL}/latest`, {
       headers: jsonbinHeaders
     });
-    
+
     if (!response.ok) throw new Error('Erreur de chargement');
-    
+
     const data = await response.json();
     recettes = data.record?.recettes || [];
-    
-    if (!recettes.length) {
-      await fetch(JSONBIN_URL, {
-        method: "PUT",
-        headers: jsonbinHeaders,
-        body: JSON.stringify({ recettes: [] })
-      });
-    }
-    
     afficherRecettes();
   } catch (error) {
     showError("Impossible de charger les recettes");
@@ -51,87 +42,110 @@ async function chargerRecettes() {
   }
 }
 
-// Sauvegarder les recettes (CORRIGÉ)
+// Ajouter une recette et synchroniser les données avec JSONBin
+async function ajouterRecetteEtSauvegarder() {
+  try {
+    // Récupérer la version actuelle des recettes sur JSONBin
+    const response = await fetch(`${JSONBIN_URL}/latest`, {
+      headers: jsonbinHeaders
+    });
+    const data = await response.json();
+    recettes = data.record?.recettes || [];
+
+    // Créer la nouvelle recette
+    const nouvelleRecette = {
+      titre: document.getElementById('titre').value.trim(),
+      auteur: document.getElementById('auteur').value.trim(),
+      difficulty: parseInt(document.getElementById('difficulty').value),
+      ingredients: document.getElementById('ingredients').value.trim(),
+      etapes: document.getElementById('etapes').value.trim()
+    };
+
+    if (Object.values(nouvelleRecette).some(v => !v)) {
+      showError("Tous les champs sont obligatoires !");
+      return;
+    }
+
+    // Ajouter la recette à la liste et sauvegarder
+    recettes.push(nouvelleRecette);
+    await sauvegarderRecettes();
+    afficherRecettes();
+    document.getElementById('formulaire-recette').reset();
+
+  } catch (error) {
+    showError("Erreur lors de l'ajout de la recette");
+    console.error(error);
+  }
+}
+
+// Sauvegarder toutes les recettes sur JSONBin
 async function sauvegarderRecettes() {
   try {
-    const nouvelleRecette = recettes[recettes.length - 1]; // Dernière recette ajoutée
-
-    const response = await fetch(`${JSONBIN_URL}/append`, {
-      method: "PATCH",
+    const response = await fetch(JSONBIN_URL, {
+      method: "PUT",
       headers: jsonbinHeaders,
-      body: JSON.stringify({ recettes: [nouvelleRecette] })
+      body: JSON.stringify({ recettes })
     });
 
     if (!response.ok) throw new Error('Erreur de sauvegarde');
-    
+
     console.log("Sauvegarde réussie !");
   } catch (error) {
     showError("Échec de la sauvegarde");
     console.error("Erreur:", error);
   }
 }
-// Afficher les recettes
+
+// Afficher les recettes dans la section correspondante
 function afficherRecettes() {
   const container = document.getElementById('liste-recettes');
-  container.innerHTML = recettes.map((recette, index) => `
-    <div class="recette">
-      <button class="btn-delete" onclick="supprimerRecette(${index})">×</button>
-      <h3>${recette.titre}</h3>
-      <p class="auteur">👨🍳 ${recette.auteur}</p>
-      <p class="difficulte">${'⭐'.repeat(recette.difficulty)}</p>
-      <div class="ingredients">
-        <h4>Ingrédients :</h4>
-        <pre>${recette.ingredients}</pre>
+  container.innerHTML = recettes
+    .map(
+      (recette, index) => `
+      <div class="recette">
+        <button class="btn-delete" onclick="supprimerRecette(${index})">×</button>
+        <h3>${recette.titre}</h3>
+        <p class="auteur">👨🍳 ${recette.auteur}</p>
+        <p class="difficulte">${'⭐'.repeat(recette.difficulty)}</p>
+        <div class="ingredients">
+          <h4>Ingrédients :</h4>
+          <pre>${recette.ingredients}</pre>
+        </div>
+        <div class="etapes">
+          <h4>Préparation :</h4>
+          <pre>${recette.etapes}</pre>
+        </div>
+        <button class="btn-edit" onclick="ouvrirModaleEdition(${index})">✏️ Modifier</button>
       </div>
-      <div class="etapes">
-        <h4>Préparation :</h4>
-        <pre>${recette.etapes}</pre>
-      </div>
-      <button class="btn-edit" onclick="ouvrirModaleEdition(${index})">✏️ Modifier</button>
-    </div>
-  `).join('');
+    `
+    )
+    .join('');
 }
 
-// Gestion formulaire d'ajout
+// Gestion du formulaire d'ajout
 document.getElementById('formulaire-recette').addEventListener('submit', async e => {
   e.preventDefault();
-
-  const nouvelleRecette = {
-    titre: document.getElementById('titre').value.trim(),
-    auteur: document.getElementById('auteur').value.trim(),
-    difficulty: parseInt(document.getElementById('difficulty').value),
-    ingredients: document.getElementById('ingredients').value.trim(),
-    etapes: document.getElementById('etapes').value.trim()
-  };
-
-  if (Object.values(nouvelleRecette).some(v => !v)) {
-    showError("Tous les champs sont obligatoires !");
-    return;
-  }
-
-  recettes.push(nouvelleRecette);
-  await sauvegarderRecettes();
-  afficherRecettes();
-  e.target.reset();
+  await ajouterRecetteEtSauvegarder();
 });
 
-// Modale d'édition
+// Ouvrir la modale d'édition de recette
 function ouvrirModaleEdition(index) {
   currentEditIndex = index;
   const recette = recettes[index];
-  
+
   document.getElementById('edit-titre').value = recette.titre;
   document.getElementById('edit-auteur').value = recette.auteur;
   document.getElementById('edit-difficulty').value = recette.difficulty;
   document.getElementById('edit-ingredients').value = recette.ingredients;
   document.getElementById('edit-etapes').value = recette.etapes;
-  
+
   document.getElementById('editModal').style.display = 'flex';
 }
 
+// Gérer la soumission du formulaire de modification
 document.getElementById('formulaire-edit').addEventListener('submit', async e => {
   e.preventDefault();
-  
+
   const recetteModifiee = {
     titre: document.getElementById('edit-titre').value.trim(),
     auteur: document.getElementById('edit-auteur').value.trim(),
@@ -146,19 +160,19 @@ document.getElementById('formulaire-edit').addEventListener('submit', async e =>
   document.getElementById('editModal').style.display = 'none';
 });
 
-// Suppression
+// Supprimer une recette
 function supprimerRecette(index) {
   recettes.splice(index, 1);
   sauvegarderRecettes();
   afficherRecettes();
 }
 
-// Fermer modale
+// Fermer la modale
 document.getElementById('closeModal').addEventListener('click', () => {
   document.getElementById('editModal').style.display = 'none';
 });
 
-// Initialisation
+// Initialisation : mode sombre et chargement des recettes
 if (localStorage.getItem('darkMode') === 'true') {
   document.body.classList.add('dark-mode');
 }
