@@ -2,98 +2,62 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <meta name="description" content="Application collaborative de gestion de recettes">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mes Recettes Collaboratives</title>
+  <title>Recettes Collaboratives</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <!-- Accessibilité -->
-  <a href="#main" class="skip-link">Aller au contenu</a>
-
-  <!-- En-tête -->
   <header>
-    <h1>🍳 Mes Recettes</h1>
-    <nav aria-label="Navigation principale">
-      <ul>
-        <li><a href="#ajout">Ajouter</a></li>
-        <li><a href="#liste">Recettes</a></li>
-      </ul>
-    </nav>
+    <h1>🍳 Recettes Collaboratives</h1>
     <button id="toggle-darkmode" class="btn-mode">🌓 Mode sombre</button>
   </header>
 
-  <!-- Contenu principal -->
-  <main id="main">
-    <div id="loading" class="loading">Chargement des recettes...</div>
-
-    <!-- Recherche -->
-    <section class="search-filter-section">
-      <input type="text" 
-             id="search-input" 
-             placeholder="🔍 Rechercher (titre, ingrédient...)">
-    </section>
-
+  <main>
     <!-- Formulaire d'ajout -->
-    <section id="ajout" class="content-wrapper">
+    <section class="content-wrapper">
       <h2>➕ Nouvelle Recette</h2>
       <form id="formulaire-recette">
         <div id="error-message" class="error-message"></div>
 
         <div class="form-group">
           <label for="titre">Titre :</label>
-          <input type="text" id="titre" name="titre" required>
+          <input type="text" id="titre" required>
         </div>
 
         <div class="form-group">
           <label for="auteur">Auteur :</label>
-          <input type="text" id="auteur" name="auteur" required>
+          <input type="text" id="auteur" required>
         </div>
 
         <div class="form-group">
           <label for="difficulty">Difficulté :</label>
-          <select id="difficulty" name="difficulty" required>
-            <option value="1">⭐ Très facile</option>
-            <option value="2">⭐⭐ Facile</option>
-            <option value="3">⭐⭐⭐ Moyen</option>
-            <option value="4">⭐⭐⭐⭐ Difficile</option>
-            <option value="5">⭐⭐⭐⭐⭐ Expert</option>
+          <select id="difficulty" required>
+            <option value="1">⭐ Débutant</option>
+            <option value="2">⭐⭐ Intermédiaire</option>
+            <option value="3">⭐⭐⭐ Confirmé</option>
           </select>
         </div>
 
         <div class="form-group">
           <label for="ingredients">Ingrédients :</label>
-          <textarea id="ingredients" 
-                    name="ingredients" 
-                    rows="4"
-                    placeholder="Un ingrédient par ligne..."
-                    required></textarea>
+          <textarea id="ingredients" rows="5" required></textarea>
         </div>
 
         <div class="form-group">
-          <label for="etapes">Étapes de préparation :</label>
-          <textarea id="etapes" 
-                    name="etapes" 
-                    rows="6"
-                    placeholder="Décrire chaque étape..."
-                    required></textarea>
+          <label for="etapes">Étapes :</label>
+          <textarea id="etapes" rows="7" required></textarea>
         </div>
 
-        <button type="submit" class="btn-primary">📤 Publier la recette</button>
+        <button type="submit" class="btn-primary">📤 Publier</button>
       </form>
     </section>
 
     <!-- Liste des recettes -->
-    <section id="liste" class="content-wrapper">
-      <h2>📜 Toutes les Recettes</h2>
+    <section class="content-wrapper">
+      <h2>📜 Recettes Existantes</h2>
       <div id="liste-recettes" class="recettes-grid"></div>
     </section>
   </main>
-
-  <!-- Pied de page -->
-  <footer>
-    <p>&copy; <span id="year"></span> - Recettes Collaboratives</p>
-  </footer>
 
   <!-- Modale d'édition -->
   <div id="editModal" class="modal">
@@ -101,15 +65,40 @@
       <span id="closeModal" class="close">&times;</span>
       <h3>✏️ Modifier la Recette</h3>
       <form id="formulaire-edit">
-        <!-- Les champs d'édition sont générés dynamiquement -->
+        <div class="form-group">
+          <label for="edit-titre">Titre :</label>
+          <input type="text" id="edit-titre" required>
+        </div>
+
+        <div class="form-group">
+          <label for="edit-auteur">Auteur :</label>
+          <input type="text" id="edit-auteur" required>
+        </div>
+
+        <div class="form-group">
+          <label for="edit-difficulty">Difficulté :</label>
+          <select id="edit-difficulty" required>
+            <option value="1">⭐ Débutant</option>
+            <option value="2">⭐⭐ Intermédiaire</option>
+            <option value="3">⭐⭐⭐ Confirmé</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="edit-ingredients">Ingrédients :</label>
+          <textarea id="edit-ingredients" rows="5" required></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="edit-etapes">Étapes :</label>
+          <textarea id="edit-etapes" rows="7" required></textarea>
+        </div>
+
+        <button type="submit" class="btn-primary">💾 Enregistrer</button>
       </form>
     </div>
   </div>
 
   <script src="script.js"></script>
-  <script>
-    // Mise à jour automatique de l'année
-    document.getElementById('year').textContent = new Date().getFullYear();
-  </script>
 </body>
 </html>
