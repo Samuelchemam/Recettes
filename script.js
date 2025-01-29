@@ -54,12 +54,14 @@ async function chargerRecettes() {
 // Sauvegarder les recettes (CORRIGÉ)
 async function sauvegarderRecettes() {
   try {
-    const response = await fetch(JSONBIN_URL, {
-      method: "PUT",
+    const nouvelleRecette = recettes[recettes.length - 1]; // Dernière recette ajoutée
+
+    const response = await fetch(`${JSONBIN_URL}/append`, {
+      method: "PATCH",
       headers: jsonbinHeaders,
-      body: JSON.stringify({ recettes })
+      body: JSON.stringify({ recettes: [nouvelleRecette] })
     });
-    
+
     if (!response.ok) throw new Error('Erreur de sauvegarde');
     
     console.log("Sauvegarde réussie !");
@@ -68,7 +70,6 @@ async function sauvegarderRecettes() {
     console.error("Erreur:", error);
   }
 }
-
 // Afficher les recettes
 function afficherRecettes() {
   const container = document.getElementById('liste-recettes');
