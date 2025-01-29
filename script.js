@@ -1,4 +1,4 @@
-const JSONBIN_URL = "https://api.jsonbin.io/v3/b/679a9300e41b4d34e480dbc8"; // URL complète
+const JSONBIN_URL = "https://api.jsonbin.io/v3/b/679a9300e41b4d34e480dbc8";
 const JSONBIN_MASTER_KEY = "$2a$10$4Ska2vFvhAi3cAtkswIlbO/HCFIQMoRFjlSK/15F763tDNEm0M5ou";
 const JSONBIN_ACCESS_KEY = "$2a$10$ucyKYm/o7HXEYZaOvTDsne2g5JVgHjcMarsDJQ6zbeqkhh4VCTu5W";
 
@@ -24,10 +24,10 @@ document.getElementById('toggle-darkmode').addEventListener('click', () => {
   localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
 });
 
-// Charger les recettes
+// Charger les recettes (CORRIGÉ)
 async function chargerRecettes() {
   try {
-    const response = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}/latest`, {
+    const response = await fetch(`${JSONBIN_URL}/latest`, {
       headers: jsonbinHeaders
     });
     
@@ -37,7 +37,7 @@ async function chargerRecettes() {
     recettes = data.record?.recettes || [];
     
     if (!recettes.length) {
-      await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`, {
+      await fetch(JSONBIN_URL, {
         method: "PUT",
         headers: jsonbinHeaders,
         body: JSON.stringify({ recettes: [] })
@@ -51,10 +51,10 @@ async function chargerRecettes() {
   }
 }
 
-// Sauvegarder les recettes
+// Sauvegarder les recettes (CORRIGÉ)
 async function sauvegarderRecettes() {
   try {
-    const response = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`, {
+    const response = await fetch(JSONBIN_URL, {
       method: "PUT",
       headers: jsonbinHeaders,
       body: JSON.stringify({ recettes })
