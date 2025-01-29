@@ -1,104 +1,53 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Recettes Collaboratives</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recettes Collaboratives</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header>
-    <h1>🍳 Recettes Collaboratives</h1>
-    <button id="toggle-darkmode" class="btn-mode">🌓 Mode sombre</button>
-  </header>
+    <header>
+        <h1>Bienvenue sur le site de recettes collaboratives</h1>
+        <button id="toggle-darkmode">Mode sombre</button>
+    </header>
 
-  <main>
-    <!-- Formulaire d'ajout -->
-    <section class="content-wrapper">
-      <h2>➕ Nouvelle Recette</h2>
-      <form id="formulaire-recette">
-        <div id="error-message" class="error-message"></div>
+    <section>
+        <h2>Ajouter une nouvelle recette</h2>
+        <form id="formulaire-recette">
+            <label for="titre">Titre de la recette :</label>
+            <input type="text" id="titre" placeholder="Ex : Gâteau au chocolat" required>
 
-        <div class="form-group">
-          <label for="titre">Titre :</label>
-          <input type="text" id="titre" required>
-        </div>
+            <label for="auteur">Auteur :</label>
+            <input type="text" id="auteur" placeholder="Ex : Samuel" required>
 
-        <div class="form-group">
-          <label for="auteur">Auteur :</label>
-          <input type="text" id="auteur" required>
-        </div>
+            <label for="difficulty">Difficulté (1 à 5) :</label>
+            <input type="number" id="difficulty" min="1" max="5" required>
 
-        <div class="form-group">
-          <label for="difficulty">Difficulté :</label>
-          <select id="difficulty" required>
-            <option value="1">⭐ Débutant</option>
-            <option value="2">⭐⭐ Intermédiaire</option>
-            <option value="3">⭐⭐⭐ Confirmé</option>
-          </select>
-        </div>
+            <label for="ingredients">Ingrédients :</label>
+            <textarea id="ingredients" rows="3" placeholder="Liste des ingrédients..." required></textarea>
 
-        <div class="form-group">
-          <label for="ingredients">Ingrédients :</label>
-          <textarea id="ingredients" rows="5" required></textarea>
-        </div>
+            <label for="etapes">Étapes :</label>
+            <textarea id="etapes" rows="4" placeholder="Décrivez les étapes de la recette..." required></textarea>
 
-        <div class="form-group">
-          <label for="etapes">Étapes :</label>
-          <textarea id="etapes" rows="7" required></textarea>
-        </div>
-
-        <button type="submit" class="btn-primary">📤 Publier</button>
-      </form>
+            <button type="submit">Ajouter la recette</button>
+        </form>
     </section>
 
-    <!-- Liste des recettes -->
-    <section class="content-wrapper">
-      <h2>📜 Recettes Existantes</h2>
-      <div id="liste-recettes" class="recettes-grid"></div>
+    <section>
+        <h2>Rechercher une recette</h2>
+        <input type="text" id="search-input" placeholder="Recherchez par titre ou ingrédient...">
     </section>
-  </main>
 
-  <!-- Modale d'édition -->
-  <div id="editModal" class="modal">
-    <div class="modal-content">
-      <span id="closeModal" class="close">&times;</span>
-      <h3>✏️ Modifier la Recette</h3>
-      <form id="formulaire-edit">
-        <div class="form-group">
-          <label for="edit-titre">Titre :</label>
-          <input type="text" id="edit-titre" required>
-        </div>
+    <section>
+        <h2>Liste des recettes</h2>
+        <div id="liste-recettes"></div>
+    </section>
 
-        <div class="form-group">
-          <label for="edit-auteur">Auteur :</label>
-          <input type="text" id="edit-auteur" required>
-        </div>
+    <footer>
+        <p>&copy; 2025 - Recettes collaboratives</p>
+    </footer>
 
-        <div class="form-group">
-          <label for="edit-difficulty">Difficulté :</label>
-          <select id="edit-difficulty" required>
-            <option value="1">⭐ Débutant</option>
-            <option value="2">⭐⭐ Intermédiaire</option>
-            <option value="3">⭐⭐⭐ Confirmé</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label for="edit-ingredients">Ingrédients :</label>
-          <textarea id="edit-ingredients" rows="5" required></textarea>
-        </div>
-
-        <div class="form-group">
-          <label for="edit-etapes">Étapes :</label>
-          <textarea id="edit-etapes" rows="7" required></textarea>
-        </div>
-
-        <button type="submit" class="btn-primary">💾 Enregistrer</button>
-      </form>
-    </div>
-  </div>
-
-  <script src="script.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
