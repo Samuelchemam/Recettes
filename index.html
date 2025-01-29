@@ -1,41 +1,47 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="description" content="Découvrez des recettes savoureuses, sucrées ou salées, et partagez vos créations culinaires.">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mes Recettes - Accueil</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mes Recettes Collaboratives</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <!-- Lien d'évitement pour l’accessibilité : permet d’aller directement au contenu -->
-  <a href="#contenu-principal" class="skip-link">Aller au contenu</a>
+    <header>
+        <h1>Bienvenue sur le site de recettes collaboratives</h1>
+    </header>
 
-  <header>
-    <h1>Bienvenue sur mon site de recettes</h1>
-    <nav aria-label="Navigation principale">
-      <ul>
-        <li><a href="index.html">Accueil</a></li>
-        <li><a href="recettes.html">Toutes les recettes</a></li>
-      </ul>
-    </nav>
-  </header>
-
-  <main id="contenu-principal">
     <section>
-      <h2>Mes recettes préférées</h2>
-      <p>Stocke ici toutes tes recettes salées et sucrées.</p>
-      <a href="recettes.html" class="btn">Voir les recettes</a>
+        <h2>Ajouter une nouvelle recette</h2>
+        <form id="formulaire-recette">
+            <label for="titre">Titre de la recette :</label>
+            <input type="text" id="titre" placeholder="Ex : Gâteau au chocolat" required>
+
+            <label for="auteur">Auteur :</label>
+            <input type="text" id="auteur" placeholder="Ex : Samuel" required>
+
+            <label for="difficulty">Difficulté (1 à 5) :</label>
+            <input type="number" id="difficulty" min="1" max="5" required>
+
+            <label for="ingredients">Ingrédients :</label>
+            <textarea id="ingredients" rows="3" placeholder="Liste des ingrédients..." required></textarea>
+
+            <label for="etapes">Étapes :</label>
+            <textarea id="etapes" rows="4" placeholder="Décrivez les étapes de la recette..." required></textarea>
+
+            <button type="submit">Ajouter la recette</button>
+        </form>
     </section>
-  </main>
 
-  <footer>
-    <p>&copy; <span id="year"></span> - Mon site de recettes</p>
-  </footer>
+    <section>
+        <h2>Liste des recettes</h2>
+        <div id="liste-recettes"></div>
+    </section>
 
-  <!-- Script pour mettre à jour l’année automatiquement -->
-  <script>
-    document.getElementById('year').textContent = new Date().getFullYear();
-  </script>
+    <footer>
+        <p>&copy; 2025 - Recettes collaboratives</p>
+    </footer>
+
+    <script src="script.js"></script>
 </body>
 </html>
