@@ -1,10 +1,16 @@
-const JSONBIN_URL = "https://api.jsonbin.io/v3/b/679a7e77e41b4d34e480d272";
-const JSONBIN_API_KEY = "$2a$10$4Ska2vFvhAi3cAtkswIlbO/HCFIQMoRFjlSK/15F763tDNEm0M5ou";
+const JSONBIN_URL = "https://api.jsonbin.io/v3/b/679a9300e41b4d34e480dbc8"; // URL complète
+const JSONBIN_MASTER_KEY = "$2a$10$4Ska2vFvhAi3cAtkswIlbO/HCFIQMoRFjlSK/15F763tDNEm0M5ou";
+const JSONBIN_ACCESS_KEY = "$2a$10$ucyKYm/o7HXEYZaOvTDsne2g5JVgHjcMarsDJQ6zbeqkhh4VCTu5W";
 
 let recettes = [];
 let currentEditIndex = null;
+const jsonbinHeaders = {
+  "Content-Type": "application/json",
+  "X-Master-Key": JSONBIN_MASTER_KEY,
+  "X-Access-Key": JSONBIN_ACCESS_KEY
+};
 
-// Gestion d'erreurs
+// Gestion des erreurs
 function showError(message) {
   const errorDiv = document.getElementById('error-message');
   errorDiv.textContent = message;
@@ -21,30 +27,45 @@ document.getElementById('toggle-darkmode').addEventListener('click', () => {
 // Charger les recettes
 async function chargerRecettes() {
   try {
-    const response = await fetch(`${JSONBIN_URL}/latest`, {
-      headers: { "X-Master-Key": JSONBIN_API_KEY }
+    const response = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}/latest`, {
+      headers: jsonbinHeaders
     });
+    
+    if (!response.ok) throw new Error('Erreur de chargement');
+    
     const data = await response.json();
     recettes = data.record?.recettes || [];
+    
+    if (!recettes.length) {
+      await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`, {
+        method: "PUT",
+        headers: jsonbinHeaders,
+        body: JSON.stringify({ recettes: [] })
+      });
+    }
+    
     afficherRecettes();
   } catch (error) {
-    showError("Erreur de chargement : " + error.message);
+    showError("Impossible de charger les recettes");
+    console.error("Erreur:", error);
   }
 }
 
 // Sauvegarder les recettes
 async function sauvegarderRecettes() {
   try {
-    await fetch(JSONBIN_URL, {
+    const response = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`, {
       method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        "X-Master-Key": JSONBIN_API_KEY
-      },
+      headers: jsonbinHeaders,
       body: JSON.stringify({ recettes })
     });
+    
+    if (!response.ok) throw new Error('Erreur de sauvegarde');
+    
+    console.log("Sauvegarde réussie !");
   } catch (error) {
-    showError("Erreur de sauvegarde : " + error.message);
+    showError("Échec de la sauvegarde");
+    console.error("Erreur:", error);
   }
 }
 
@@ -70,7 +91,7 @@ function afficherRecettes() {
   `).join('');
 }
 
-// Gestion formulaire
+// Gestion formulaire d'ajout
 document.getElementById('formulaire-recette').addEventListener('submit', async e => {
   e.preventDefault();
 
@@ -93,7 +114,7 @@ document.getElementById('formulaire-recette').addEventListener('submit', async e
   e.target.reset();
 });
 
-// Gestion édition
+// Modale d'édition
 function ouvrirModaleEdition(index) {
   currentEditIndex = index;
   const recette = recettes[index];
