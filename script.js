@@ -1,5 +1,5 @@
 /***************************************
- *         script.js (finalisé)
+ *         script.js (corrigé)
  ***************************************/
 
 // URL de ton bin JSONbin.io et ta clé API
@@ -84,10 +84,11 @@ function afficherRecettes() {
         return;
     }
 
-    data.forEach((recette) => {
+    data.forEach((recette, index) => {
         const divRecette = document.createElement("div");
         divRecette.classList.add("recette");
         divRecette.innerHTML = `
+            <button class="btn-delete" aria-label="Supprimer la recette">&times;</button>
             <h3>${recette.titre}</h3>
             <p><strong>Auteur :</strong> ${recette.auteur}</p>
             <p><strong>Difficulté :</strong> ${recette.difficulty}/5</p>
@@ -95,14 +96,52 @@ function afficherRecettes() {
             <p>${recette.ingredients.replace(/\n/g, "<br>")}</p>
             <h4>Étapes</h4>
             <p>${recette.etapes.replace(/\n/g, "<br>")}</p>
+            <button class="btn-edit">Modifier</button>
         `;
+
+        // Gestion du bouton supprimer
+        const btnDelete = divRecette.querySelector(".btn-delete");
+        btnDelete.addEventListener("click", (e) => {
+            e.stopPropagation();
+            supprimerRecette(index);
+        });
+
+        // Gestion du bouton modifier
+        const btnEdit = divRecette.querySelector(".btn-edit");
+        btnEdit.addEventListener("click", () => modifierRecette(index));
 
         listeRecettes.appendChild(divRecette);
     });
 }
 
 /**************************************
- * 4. Ajout d’une nouvelle recette
+ * 4. Suppression de recette
+ **************************************/
+function supprimerRecette(index) {
+    recettes.splice(index, 1); // Supprimer la recette
+    sauvegarderRecettesSurJSONbin(); // Mettre à jour le bin JSON
+    afficherRecettes(); // Réafficher la liste
+}
+
+/**************************************
+ * 5. Modification de recette
+ **************************************/
+function modifierRecette(index) {
+    const recette = recettes[index];
+    const titre = prompt("Modifier le titre :", recette.titre) || recette.titre;
+    const auteur = prompt("Modifier l’auteur :", recette.auteur) || recette.auteur;
+    const difficulty = parseInt(prompt("Modifier la difficulté (1-5) :", recette.difficulty), 10) || recette.difficulty;
+    const ingredients = prompt("Modifier les ingrédients :", recette.ingredients) || recette.ingredients;
+    const etapes = prompt("Modifier les étapes :", recette.etapes) || recette.etapes;
+
+    // Mise à jour de la recette
+    recettes[index] = { titre, auteur, difficulty, ingredients, etapes };
+    sauvegarderRecettesSurJSONbin(); // Mettre à jour le bin
+    afficherRecettes(); // Réafficher la liste
+}
+
+/**************************************
+ * 6. Ajout d’une nouvelle recette
  **************************************/
 document.getElementById("formulaire-recette").addEventListener("submit", async function (e) {
     e.preventDefault();
