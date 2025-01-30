@@ -5,6 +5,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Recettes Collaboratives</title>
     <link rel="stylesheet" href="style.css">
+
+    <!-- 1) Ajout des bibliothèques Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-database.js"></script>
+
+    <script>
+      // 2) Configuration Firebase (exemple)
+      const firebaseConfig = {
+        apiKey: "AIzaSyAm_iCfNAKBb4KE_UhCDFq25ZA0Q0-MNfA",
+        authDomain: "site-web-recettes.firebaseapp.com",
+        databaseURL: "https://site-web-recettes-default-rtdb.europe-west1.firebasedatabase.app",
+        projectId: "site-web-recettes",
+        storageBucket: "site-web-recettes.appspot.com",
+        messagingSenderId: "616026617837",
+        appId: "1:616026617837:web:8de2604f97a5633094d9e4",
+        measurementId: "G-9R9TMNM9JY"
+      };
+
+      // 3) Initialisation de Firebase
+      const app = firebase.initializeApp(firebaseConfig);
+      // Récupération de l'instance de la Realtime Database
+      const database = firebase.database();
+    </script>
 </head>
 <body>
     <header>
@@ -48,6 +71,7 @@
         <p>&copy; 2025 - Recettes collaboratives</p>
     </footer>
 
+    <!-- 4) Ton script principal -->
     <script src="script.js"></script>
 </body>
 </html>
