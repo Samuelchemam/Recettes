@@ -1,4 +1,6 @@
+// ==================================
 // Configuration Firebase
+// ==================================
 const firebaseConfig = {
   apiKey: "AIzaSyAm_iCfNAKBb4KE_UhCDFq25ZA0Q0-MNfA",
   authDomain: "site-web-recettes.firebaseapp.com",
@@ -10,14 +12,18 @@ const firebaseConfig = {
   measurementId: "G-9R9TMNM9JY"
 };
 
+// ==================================
 // Initialiser Firebase
-const app = firebase.initializeApp(firebaseConfig);
+// ==================================
+firebase.initializeApp(firebaseConfig);
 const database = firebase.database();
 
 let recettes = [];
 let currentEditIndex = null;
 
+// ==================================
 // Gestion des erreurs
+// ==================================
 function showError(message) {
   const errorDiv = document.getElementById('error-message');
   errorDiv.textContent = message;
@@ -25,17 +31,27 @@ function showError(message) {
   setTimeout(() => (errorDiv.style.display = 'none'), 3000);
 }
 
+// ==================================
 // Mode sombre
+// ==================================
 document.getElementById('toggle-darkmode').addEventListener('click', () => {
   document.body.classList.toggle('dark-mode');
   localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
 });
 
+// ==================================
 // Charger les recettes depuis Firebase
+// ==================================
 async function chargerRecettes() {
   try {
+    // Récupère un instantané des données
     const snapshot = await database.ref('recettes').once('value');
+
+    // Si rien dans la DB, snapshot.val() sera null
     recettes = snapshot.val() || [];
+    
+    // Si "recettes" est un objet (car .set() stocke un tableau) c'est correct
+    // firebase stocke un objet ou un tableau ; ici nous gardons un tableau.
     afficherRecettes();
   } catch (error) {
     showError("Impossible de charger les recettes");
@@ -43,7 +59,9 @@ async function chargerRecettes() {
   }
 }
 
-// Ajouter une recette et sauvegarder dans Firebase
+// ==================================
+// Ajouter une recette et sauvegarder
+// ==================================
 async function ajouterRecetteEtSauvegarder() {
   try {
     const nouvelleRecette = {
@@ -54,14 +72,22 @@ async function ajouterRecetteEtSauvegarder() {
       etapes: document.getElementById('etapes').value.trim()
     };
 
+    // Vérif champs obligatoires
     if (Object.values(nouvelleRecette).some(v => !v)) {
       showError("Tous les champs sont obligatoires !");
       return;
     }
 
+    // Ajoute la recette dans notre variable locale
     recettes.push(nouvelleRecette);
+
+    // Sauvegarde le tableau complet dans Firebase
     await sauvegarderRecettes();
+
+    // Rafraîchir l'affichage
     afficherRecettes();
+
+    // Réinitialiser le formulaire
     document.getElementById('formulaire-recette').reset();
   } catch (error) {
     showError("Erreur lors de l'ajout de la recette");
@@ -69,9 +95,12 @@ async function ajouterRecetteEtSauvegarder() {
   }
 }
 
-// Sauvegarder les recettes dans Firebase
+// ==================================
+// Sauvegarder le tableau complet
+// ==================================
 async function sauvegarderRecettes() {
   try {
+    // On écrase le nœud "recettes" avec notre tableau
     await database.ref('recettes').set(recettes);
     console.log("Sauvegarde réussie !");
   } catch (error) {
@@ -80,12 +109,13 @@ async function sauvegarderRecettes() {
   }
 }
 
+// ==================================
 // Afficher les recettes
+// ==================================
 function afficherRecettes() {
   const container = document.getElementById('liste-recettes');
   container.innerHTML = recettes
-    .map(
-      (recette, index) => `
+    .map((recette, index) => `
       <div class="recette">
         <button class="btn-delete" onclick="supprimerRecette(${index})">×</button>
         <h3>${recette.titre}</h3>
@@ -101,18 +131,21 @@ function afficherRecettes() {
         </div>
         <button class="btn-edit" onclick="ouvrirModaleEdition(${index})">✏️ Modifier</button>
       </div>
-    `
-    )
+    `)
     .join('');
 }
 
-// Gestion du formulaire d'ajout
+// ==================================
+// Formulaire d'ajout
+// ==================================
 document.getElementById('formulaire-recette').addEventListener('submit', async e => {
   e.preventDefault();
   await ajouterRecetteEtSauvegarder();
 });
 
+// ==================================
 // Ouvrir la modale d'édition
+// ==================================
 function ouvrirModaleEdition(index) {
   currentEditIndex = index;
   const recette = recettes[index];
@@ -126,7 +159,9 @@ function ouvrirModaleEdition(index) {
   document.getElementById('editModal').style.display = 'flex';
 }
 
-// Gérer la soumission du formulaire de modification
+// ==================================
+// Édition de recette
+// ==================================
 document.getElementById('formulaire-edit').addEventListener('submit', async e => {
   e.preventDefault();
 
@@ -144,20 +179,28 @@ document.getElementById('formulaire-edit').addEventListener('submit', async e =>
   document.getElementById('editModal').style.display = 'none';
 });
 
-// Supprimer une recette
+// ==================================
+// Suppression d'une recette
+// ==================================
 function supprimerRecette(index) {
   recettes.splice(index, 1);
   sauvegarderRecettes();
   afficherRecettes();
 }
 
-// Fermer la modale
+// ==================================
+// Fermer la modale d'édition
+// ==================================
 document.getElementById('closeModal').addEventListener('click', () => {
   document.getElementById('editModal').style.display = 'none';
 });
 
-// Initialisation : mode sombre et chargement des recettes
+// ==================================
+// Initialisation au chargement
+// ==================================
 if (localStorage.getItem('darkMode') === 'true') {
   document.body.classList.add('dark-mode');
 }
+
+// Charger les recettes existantes depuis Firebase
 chargerRecettes();
