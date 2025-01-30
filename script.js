@@ -1,14 +1,21 @@
-const JSONBIN_URL = "https://api.jsonbin.io/v3/b/679a9300e41b4d34e480dbc8";
-const JSONBIN_MASTER_KEY = "$2a$10$4Ska2vFvhAi3cAtkswIlbO/HCFIQMoRFjlSK/15F763tDNEm0M5ou";
-const JSONBIN_ACCESS_KEY = "$2a$10$ucyKYm/o7HXEYZaOvTDsne2g5JVgHjcMarsDJQ6zbeqkhh4VCTu5W";
+// Configuration Firebase
+const firebaseConfig = {
+  apiKey: "AIzaSyAm_iCfNAKBb4KE_UhCDFq25ZA0Q0-MNfA",
+  authDomain: "site-web-recettes.firebaseapp.com",
+  databaseURL: "https://site-web-recettes-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "site-web-recettes",
+  storageBucket: "site-web-recettes.firebasestorage.app",
+  messagingSenderId: "616026617837",
+  appId: "1:616026617837:web:8de2604f97a5633094d9e4",
+  measurementId: "G-9R9TMNM9JY"
+};
+
+// Initialiser Firebase
+const app = firebase.initializeApp(firebaseConfig);
+const database = firebase.database();
 
 let recettes = [];
 let currentEditIndex = null;
-const jsonbinHeaders = {
-  "Content-Type": "application/json",
-  "X-Master-Key": JSONBIN_MASTER_KEY,
-  "X-Access-Key": JSONBIN_ACCESS_KEY
-};
 
 // Gestion des erreurs
 function showError(message) {
@@ -24,17 +31,11 @@ document.getElementById('toggle-darkmode').addEventListener('click', () => {
   localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
 });
 
-// Charger les recettes (restauration initiale)
+// Charger les recettes depuis Firebase
 async function chargerRecettes() {
   try {
-    const response = await fetch(`${JSONBIN_URL}/latest`, {
-      headers: jsonbinHeaders
-    });
-
-    if (!response.ok) throw new Error('Erreur de chargement');
-
-    const data = await response.json();
-    recettes = data.record?.recettes || [];
+    const snapshot = await database.ref('recettes').once('value');
+    recettes = snapshot.val() || [];
     afficherRecettes();
   } catch (error) {
     showError("Impossible de charger les recettes");
@@ -42,17 +43,9 @@ async function chargerRecettes() {
   }
 }
 
-// Ajouter une recette et synchroniser les données avec JSONBin
+// Ajouter une recette et sauvegarder dans Firebase
 async function ajouterRecetteEtSauvegarder() {
   try {
-    // Récupérer la version actuelle des recettes sur JSONBin
-    const response = await fetch(`${JSONBIN_URL}/latest`, {
-      headers: jsonbinHeaders
-    });
-    const data = await response.json();
-    recettes = data.record?.recettes || [];
-
-    // Créer la nouvelle recette
     const nouvelleRecette = {
       titre: document.getElementById('titre').value.trim(),
       auteur: document.getElementById('auteur').value.trim(),
@@ -66,29 +59,20 @@ async function ajouterRecetteEtSauvegarder() {
       return;
     }
 
-    // Ajouter la recette à la liste et sauvegarder
     recettes.push(nouvelleRecette);
     await sauvegarderRecettes();
     afficherRecettes();
     document.getElementById('formulaire-recette').reset();
-
   } catch (error) {
     showError("Erreur lors de l'ajout de la recette");
     console.error(error);
   }
 }
 
-// Sauvegarder toutes les recettes sur JSONBin
+// Sauvegarder les recettes dans Firebase
 async function sauvegarderRecettes() {
   try {
-    const response = await fetch(JSONBIN_URL, {
-      method: "PUT",
-      headers: jsonbinHeaders,
-      body: JSON.stringify({ recettes })
-    });
-
-    if (!response.ok) throw new Error('Erreur de sauvegarde');
-
+    await database.ref('recettes').set(recettes);
     console.log("Sauvegarde réussie !");
   } catch (error) {
     showError("Échec de la sauvegarde");
@@ -96,7 +80,7 @@ async function sauvegarderRecettes() {
   }
 }
 
-// Afficher les recettes dans la section correspondante
+// Afficher les recettes
 function afficherRecettes() {
   const container = document.getElementById('liste-recettes');
   container.innerHTML = recettes
@@ -128,7 +112,7 @@ document.getElementById('formulaire-recette').addEventListener('submit', async e
   await ajouterRecetteEtSauvegarder();
 });
 
-// Ouvrir la modale d'édition de recette
+// Ouvrir la modale d'édition
 function ouvrirModaleEdition(index) {
   currentEditIndex = index;
   const recette = recettes[index];
